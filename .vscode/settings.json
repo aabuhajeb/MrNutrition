@@ -1,0 +1,4 @@
+{
+    "python.pythonPath": "/Users/aliabuhajeb/opt/miniconda3/envs/MyDjangoEnv/bin/python",
+    "python.linting.pylintArgs": [         "--load-plugins=pylint_django", ],
+}

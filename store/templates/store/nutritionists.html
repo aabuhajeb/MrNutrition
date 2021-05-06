@@ -1,0 +1,18 @@
+{% extends 'store/main.html' %}
+{% load static %}
+{% block content %}
+
+    <div class="row">
+        {% for nutritionist in nutritionists %}
+        <div class="col-lg-4">
+            <img class="thumbnail" src="{{nutritionist.imageURL}}" >
+            <div class="box-element product">
+                <h6><strong>{{nutritionist.name}}</strong></h6>
+                <hr>
+                <a class="btn btn-outline-success" href="#">View</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+{% endblock content %}
