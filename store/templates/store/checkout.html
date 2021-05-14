@@ -44,7 +44,7 @@
             <div class="box-element hidden" id="payment-info">
                 <small>PayPal Options</small>
                 <div id="paypal-button-container"></div>
-                <!--<button id="make-payment">Make payment</button>-->
+                <button id="make-payment">Make payment</button>
             </div>
         </div>
         <div class="col-lg-6">
@@ -128,10 +128,10 @@
             document.getElementById('form-button').classList.add("hidden")
             document.getElementById('payment-info').classList.remove("hidden")
         })
-        /*
+        
         document.getElementById('make-payment').addEventListener('click', function(e){
             submitFormData()
-        })*/
+        })
         function submitFormData(){
             console.log('Payment button clicked')
 

@@ -7,14 +7,51 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
 from .models import *
 from .forms import OrderForm, CreateUserForm, CustomerForm
 from .decorators import unauthenticated_user, allowed_users, admin_only
 from .utils import cookieCart, cartData, guestOrder
 from .filters import ProductFilter
+from .serializers import *
 
 # Create your views here.
+@api_view(['GET'])
+def productsList(request):
+    products = Product.objects.all()
+    serializer = ProductSerializer(products, many=True)
+    return Response(serializer.data)
 
+@api_view(['GET'])
+def productsDetail(request, pk):
+    products = Product.objects.get(id=pk)
+    serializer = ProductSerializer(products, many=False)
+    return Response(serializer.data)
+
+@api_view(['POST'])
+def productsCreate(request):
+    serializer = ProductSerializer(data=request.data)
+
+    if serializer.is_valid():
+        serializer.save()
+    return Response(serializer.data)
+
+@api_view(['POST'])
+def productsUpdate(request, pk):
+    product = Product.objects.get(id=pk)
+    serializer = ProductSerializer(instance=product, data=request.data)
+
+    if serializer.is_valid():
+        serializer.save()
+    return Response(serializer.data)
+
+@api_view(['DELETE'])
+def productsDelete(request, pk):
+    product = Product.objects.get(id=pk)
+    product.delete()
+    return Response('Item Successfully deleted')
 
 def store(request):
     customer= Customer.objects.get(id=1)
@@ -31,6 +68,7 @@ def store(request):
     context = {'products':products, 'cartItems':cartItems, 'myFilter':myFilter}
     return render(request, 'store/store.html', context)
 
+
 def nutritionist(request):
     nutritionists = Customer.objects.all()
 
@@ -38,6 +76,7 @@ def nutritionist(request):
         'nutritionists':nutritionists
     }
     return render(request, 'store/nutritionists.html', context)
+
 
 def cart(request):
     data = cartData(request)
@@ -48,6 +87,7 @@ def cart(request):
     context = {'items':items, 'order':order, 'cartItems':cartItems}
     return render(request, 'store/cart.html', context)
 
+
 def checkout(request):
     data = cartData(request)
     cartItems = data['cartItems']
@@ -56,6 +96,7 @@ def checkout(request):
 
     context = {'items':items, 'order':order, 'cartItems':cartItems}
     return render(request, 'store/checkout.html', context)
+
 
 def updateItem(request):
     data = json.loads(request.body)
@@ -111,6 +152,7 @@ def processOrder(request):
 
     return JsonResponse('Payment Complete!', safe=False)
 
+
 @unauthenticated_user
 def registerPage(request):
     form = CreateUserForm()
@@ -127,6 +169,7 @@ def registerPage(request):
 
     return render(request, 'store/register.html', context)
 
+
 @unauthenticated_user
 def loginPage(request):
     if request.method == 'POST':
@@ -136,26 +179,30 @@ def loginPage(request):
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
-            return JsonResponse({'success':True,'user':user})
+            customer = Customer.objects.get(user=user)
+            #return JsonResponse({'success':True,'name':customer.name, 'phone':customer.phone})
+            '''
         else:
             return JsonResponse({'success':False})
             '''
+        
             login(request, user)
             return redirect('/')
         else:
             messages.info(request, 'Username or Password is incorrect')
-            '''
+        
         
 
     context = {}
     return render(request, 'store/login.html', context)
 
+
 def logoutUser(request):
     logout(request)
     return redirect('/login')
 
+
 @login_required(login_url='/login')
-@allowed_users(allowed_roles=['customer'])
 def accountSettings(request):
     customer = request.user.customer
     form = CustomerForm(instance=customer)
@@ -167,3 +214,14 @@ def accountSettings(request):
 
     context = {'form':form}
     return render(request, 'store/account_settings.html', context)
+
+
+def rate_image(request):
+    if request.method == 'POST':
+        el_id = request.POST.get('el_id')
+        val = request.POST.get('val')
+        obj = Product.objects.get(id=el_id)
+        obj.score = val
+        obj.save()
+        return JsonResponse({'success':'True', 'score':val},safe=False)
+    return JsonResponse({'success':'Fasle'})

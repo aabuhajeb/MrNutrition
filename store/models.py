@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import FieldDoesNotExist
+from django.core.validators import MaxLengthValidator, MinLengthValidator
 # Create your models here.
 
 class Customer(models.Model):
@@ -81,8 +82,10 @@ class Product(models.Model):
     food_flavor = models.CharField(max_length=200, null=True, choices=FOODSIZE)
     food_manufacture = models.CharField(max_length=200, null=True, choices=FOODMANUFACTURE)
     description = models.TextField(null=True, blank=True)
-    rating = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)
-    numReviews = models.IntegerField(null=True, blank=True, default=0 )
+    rating = models.IntegerField(default=0, validators=[
+        MaxLengthValidator(5),
+        MinLengthValidator(0),
+    ])
     countInStock = models.IntegerField(null=True, blank=True, default=0)
     createdAt = models.DateTimeField(auto_now_add=False, null=True, blank=True)
     
